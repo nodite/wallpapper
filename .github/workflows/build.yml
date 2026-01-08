@@ -30,22 +30,20 @@ jobs:
           .build/apple/Products/Release/wallpapper-exif
         generate_release_notes: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
-    - name: Create Pull Request to main
-      uses: peter-evans/create-pull-request@v6
-      with:
-        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-        branch: release
-        base: main
-        title: "chore: sync release ${{ github.ref_name }} back to main"
-        body: |
-          Automatically created PR to sync release branch back to main after creating release ${{ github.ref_name }}.
+    - name: Create PR to sync release to main
+      run: |
+        gh pr create \
+          --base main \
+          --head release \
+          --title "chore: sync release ${{ github.ref_name }} back to main" \
+          --body "Automatically created PR to sync release branch back to main after creating release ${{ github.ref_name }}.
 
-          This PR includes:
-          - Version bump to ${{ github.ref_name }}
-          - Any release-specific changes
-        labels: |
-          automated
-          release
-        draft: false
+        This PR includes:
+        - Version bump to ${{ github.ref_name }}
+        - Any release-specific changes" \
+          --label automated,release \
+          || echo "PR already exists or no changes to sync"
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
