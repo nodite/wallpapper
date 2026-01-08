@@ -1,6 +1,6 @@
 # 💻 wallpapper / wallpapper-exif
 
-![Build Status](https://github.com/mczachurski/wallpapper/workflows/Build/badge.svg)
+![Build Status](https://github.com/nodite/wallpapper/workflows/Build/badge.svg)
 [![Swift 5.2](https://img.shields.io/badge/Swift-5.2-orange.svg?style=flat)](ttps://developer.apple.com/swift/)
 [![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://swift.org/package-manager/)
 [![Platforms OS X | Linux](https://img.shields.io/badge/Platforms-macOS%20-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
@@ -32,7 +32,7 @@ You need to have latest XCode (10.2) and Swift 5 installed.
 Open your terminal and run following commands.
 
 ```bash
-brew tap mczachurski/wallpapper
+brew tap nodite/wallpapper
 brew install wallpapper
 ```
 
@@ -41,7 +41,7 @@ brew install wallpapper
 Open your terminal and run following commands.
 
 ```bash
-$ git clone https://github.com/mczachurski/wallpapper.git
+$ git clone https://github.com/nodite/wallpapper.git
 $ cd wallpapper
 $ swift build --configuration release
 $ sudo cp .build/release/wallpapper /usr/local/bin
@@ -53,7 +53,7 @@ If you are using swift in version 4.1, please edit `Package.swift` file and put 
 Also you can build using `build.sh` script (it uses `swiftc` instead Swift CLI).
 
 ```bash
-$ git clone https://github.com/mczachurski/wallpapper.git
+$ git clone https://github.com/nodite/wallpapper.git
 $ cd wallpapper
 $ ./build.sh
 $ sudo cp .output/wallpapper /usr/local/bin
@@ -76,17 +76,17 @@ That's all. Now you can build your own dynamic wallpappers.
 
 ### Troubleshooting
 
-If you get an error during the Swift build portion of install, try downloading the entire Xcode IDE (not just the tools) from the app store. Then run 
+If you get an error during the Swift build portion of install, try downloading the entire Xcode IDE (not just the tools) from the app store. Then run
 
 ```bash
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer 
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
 and run the installation command again.
 
 ## Getting started
 
-If you have done above commands now you can build dynamic wallpaper. It's really easy. First you have to put all you pictures into one folder and in the same folder create `json` file with picture's description. Application support three kinds of dynamic wallpapers. 
+If you have done above commands now you can build dynamic wallpaper. It's really easy. First you have to put all you pictures into one folder and in the same folder create `json` file with picture's description. Application support three kinds of dynamic wallpapers.
 
 ### Solar
 
@@ -165,7 +165,7 @@ Properties:
 
 ### Apperance
 
-For wallpapers based on OS apperance settings (light/dark) we have to prepare much simpler JSON file, and we have to use only two images (one for light and one for dark theme). 
+For wallpapers based on OS apperance settings (light/dark) we have to prepare much simpler JSON file, and we have to use only two images (one for light and one for dark theme).
 
 ```json
 [
@@ -196,7 +196,7 @@ When you have `json` file and all pictures then you can generate `heic` file. Yo
 wallpapper -i wallpapper.json
 ```
 
-You should got a new file: `output.heic`. Set this file as a new wallpaper and enjoy you own dynamic wallpaper! 
+You should got a new file: `output.heic`. Set this file as a new wallpaper and enjoy you own dynamic wallpaper!
 
 ### Extracting metadata
 

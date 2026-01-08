@@ -2,19 +2,33 @@ name: Build
 
 on:
   push:
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
+
     - name: Build
       run: swift build --configuration release --arch arm64 --arch x86_64
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: wallpaper
         path: |
           .build/apple/Products/Release/wallpapper
           .build/apple/Products/Release/wallpapper-exif
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          .build/apple/Products/Release/wallpapper
+          .build/apple/Products/Release/wallpapper-exif
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
