@@ -59,10 +59,10 @@ jobs:
         VERSION="${{ steps.get_version.outputs.version }}"
 
         # 更新 Wallpapper/Program.swift 中的版本
-        sed -i '' "s/self.consoleIO.writeMessage(\"[0-9]\+\.[0-9]\+\.[0-9]\+\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/Wallpapper/Program.swift
+        sed -i "s/self\.consoleIO\.writeMessage(\"\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/Wallpapper/Program.swift
 
         # 更新 WallpapperExif/Program.swift 中的版本
-        sed -i '' "s/self.consoleIO.writeMessage(\"[0-9]\+\.[0-9]\+\.[0-9]\+\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/WallpapperExif/Program.swift
+        sed -i "s/self\.consoleIO\.writeMessage(\"\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/WallpapperExif/Program.swift
 
         echo "Updated version to $VERSION in source files"
 
