@@ -2,19 +2,51 @@ name: Build
 
 on:
   push:
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
     - name: Build
       run: swift build --configuration release --arch arm64 --arch x86_64
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: wallpaper
         path: |
           .build/apple/Products/Release/wallpapper
           .build/apple/Products/Release/wallpapper-exif
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          .build/apple/Products/Release/wallpapper
+          .build/apple/Products/Release/wallpapper-exif
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+    - name: Create PR to sync release to main
+      run: |
+        gh pr create \
+          --base main \
+          --head release \
+          --title "chore: sync release ${{ github.ref_name }} back to main" \
+          --body "Automatically created PR to sync release branch back to main after creating release ${{ github.ref_name }}.
+
+        This PR includes:
+        - Version bump to ${{ github.ref_name }}
+        - Any release-specific changes" \
+          --label automated,release \
+          || echo "PR already exists or no changes to sync"
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
