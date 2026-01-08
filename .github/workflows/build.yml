@@ -11,6 +11,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
     - name: Build
       run: swift build --configuration release --arch arm64 --arch x86_64
