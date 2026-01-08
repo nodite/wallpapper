@@ -1,0 +1,94 @@
+name: Auto Tag
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  auto-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from commit
+      id: get_version
+      run: |
+        # 从最近的提交消息或版本文件中获取版本号
+        # 检查是否有版本号相关的提交
+        VERSION=$(git log -1 --pretty=%B | grep -oP '(?<=version |v)\d+\.\d+\.\d+' || echo "")
+
+        if [ -z "$VERSION" ]; then
+          # 如果提交消息中没有版本号，尝试从现有标签递增
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+
+          # 提取版本号并递增补丁版本
+          if [[ $LATEST_TAG =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PATCH=$((PATCH + 1))
+            VERSION="$MAJOR.$MINOR.$PATCH"
+          else
+            VERSION="1.0.0"
+          fi
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "New version will be: $VERSION"
+
+    - name: Check if tag exists
+      id: check_tag
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        if git rev-parse "$VERSION" >/dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "Tag $VERSION already exists"
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "Tag $VERSION does not exist"
+        fi
+
+    - name: Update version in source files
+      if: steps.check_tag.outputs.exists == 'false'
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+
+        # 更新 Wallpapper/Program.swift 中的版本
+        sed -i '' "s/self.consoleIO.writeMessage(\"[0-9]\+\.[0-9]\+\.[0-9]\+\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/Wallpapper/Program.swift
+
+        # 更新 WallpapperExif/Program.swift 中的版本
+        sed -i '' "s/self.consoleIO.writeMessage(\"[0-9]\+\.[0-9]\+\.[0-9]\+\")/self.consoleIO.writeMessage(\"$VERSION\")/" Sources/WallpapperExif/Program.swift
+
+        echo "Updated version to $VERSION in source files"
+
+    - name: Commit version changes
+      if: steps.check_tag.outputs.exists == 'false'
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # 检查是否有变更
+        if git diff --quiet; then
+          echo "No version changes to commit"
+        else
+          git add Sources/Wallpapper/Program.swift Sources/WallpapperExif/Program.swift
+          git commit -m "chore: bump version to $VERSION"
+          git push origin release
+          echo "Committed and pushed version changes"
+        fi
+
+    - name: Create and push tag
+      if: steps.check_tag.outputs.exists == 'false'
+      run: |
+        VERSION="${{ steps.get_version.outputs.version }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "$VERSION" -m "Release $VERSION"
+        git push origin "$VERSION"
+        echo "Created and pushed tag: $VERSION"
